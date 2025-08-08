@@ -10,14 +10,15 @@ This is a Model Context Protocol (MCP) server that provides tools for retrieving
 
 The project follows a service-oriented architecture:
 
-- **AgentRulesMCPServer** (`src/server.ts`): Main MCP server class that handles tool registration and requests
-- **CursorRulesService** (`src/services/cursor-rules-service.ts`): Manages loading and filtering of `.cursor/rules/*.mdc` files
-- **AgentsService** (`src/services/agents-service.ts`): Manages loading of `AGENTS.md` files
-- **frontmatter-parser** (`src/utils/frontmatter-parser.ts`): Utility for parsing YAML frontmatter from markdown files
+- **AgentRulesMCPServer** (`src/server.ts`): Main MCP server class that handles tool registration and requests. Uses structured error handling without console logging for production-ready operation.
+- **CursorRulesService** (`src/services/cursor-rules-service.ts`): Manages loading and filtering of `.cursor/rules/*.mdc` files. Provides structured error reporting through `fileErrors` array for individual file failures while continuing to process valid files.
+- **AgentsService** (`src/services/agents-service.ts`): Manages loading of `AGENTS.md` files. Returns consistent `null` values for error cases instead of empty objects.
+- **frontmatter-parser** (`src/utils/frontmatter-parser.ts`): Utility for parsing YAML frontmatter from markdown files. Handles parsing errors gracefully with fallback behavior instead of console logging.
 
 ## Available MCP Tools
 
 The server provides these tools:
+
 - `load_cursor_rules` - Load and cache all Cursor rules from `.cursor/rules` directory
 - `get_cursor_rules` - Get applicable Cursor rules for a specific file path
 - `list_cursor_rules` - List all available Cursor rules files
@@ -34,6 +35,7 @@ The server provides these tools:
 ## TypeScript Configuration
 
 The project uses:
+
 - Path aliases with `@/*` mapping to `src/*`
 - ES2022 target and modules
 - Custom path resolution via `ts-paths-loader.mjs` for runtime execution
@@ -44,3 +46,6 @@ The project uses:
 - All services implement caching with project root as the cache key
 - Cursor rules use glob patterns for file matching and support frontmatter metadata
 - The frontmatter parser handles arrays, booleans, and strings from YAML-like syntax
+- Error handling is production-ready with structured error reporting instead of console logging
+- Services return consistent null values for error cases and provide detailed error information through return values
+- GitHub Actions workflows automatically infer pnpm version from package.json `packageManager` field

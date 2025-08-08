@@ -14,11 +14,18 @@ export interface CursorRule {
 export class CursorRulesService {
   private rulesCache = new Map<string, CursorRule[]>();
 
-  async loadRules(projectRoot?: string): Promise<{ rules: CursorRule[]; message: string; error?: boolean; fileErrors?: string[] }> {
+  async loadRules(
+    projectRoot?: string,
+  ): Promise<{
+    rules: CursorRule[];
+    message: string;
+    error?: boolean;
+    fileErrors?: string[];
+  }> {
     try {
       const rootDir = projectRoot || process.cwd();
       const rulesDir = join(rootDir, '.cursor', 'rules');
-      
+
       let files;
       try {
         files = await readdir(rulesDir);
@@ -30,7 +37,7 @@ export class CursorRulesService {
         };
       }
 
-      const mdcFiles = files.filter(file => extname(file) === '.mdc');
+      const mdcFiles = files.filter((file) => extname(file) === '.mdc');
       const rules: CursorRule[] = [];
       const fileErrors: string[] = [];
 
@@ -38,37 +45,50 @@ export class CursorRulesService {
         const filePath = join(rulesDir, file);
         try {
           const content = await readFile(filePath, 'utf-8');
-          const { frontmatter, content: ruleContent } = parseFrontmatter(content);
-          
+          const { frontmatter, content: ruleContent } =
+            parseFrontmatter(content);
+
           rules.push({
             file: file,
             description: frontmatter.description || 'No description',
-            globs: Array.isArray(frontmatter.globs) 
-              ? frontmatter.globs 
-              : (frontmatter.globs ? [frontmatter.globs] : []),
+            globs: Array.isArray(frontmatter.globs)
+              ? frontmatter.globs
+              : frontmatter.globs
+                ? [frontmatter.globs]
+                : [],
             alwaysApply: frontmatter.alwaysApply || false,
             content: ruleContent,
           });
         } catch (error) {
-          fileErrors.push(`Error reading rule file ${file}: ${(error as Error).message}`);
+          fileErrors.push(
+            `Error reading rule file ${file}: ${(error as Error).message}`,
+          );
         }
       }
 
       this.rulesCache.set(rootDir, rules);
 
       let message = `Loaded ${rules.length} rule files from ${rulesDir}:\n\n${rules
-        .map(rule => `• ${rule.file}: ${rule.description}\n  Globs: ${rule.globs.join(', ')}\n  Always apply: ${rule.alwaysApply}`)
+        .map(
+          (rule) =>
+            `• ${rule.file}: ${rule.description}\n  Globs: ${rule.globs.join(', ')}\n  Always apply: ${rule.alwaysApply}`,
+        )
         .join('\n\n')}`;
 
       if (fileErrors.length > 0) {
-        message += `\n\nWarnings:\n${fileErrors.map(err => `• ${err}`).join('\n')}`;
+        message += `\n\nWarnings:\n${fileErrors.map((err) => `• ${err}`).join('\n')}`;
       }
 
-      const result: { rules: CursorRule[]; message: string; error?: boolean; fileErrors?: string[] } = { rules, message };
+      const result: {
+        rules: CursorRule[];
+        message: string;
+        error?: boolean;
+        fileErrors?: string[];
+      } = { rules, message };
       if (fileErrors.length > 0) {
         result.fileErrors = fileErrors;
       }
-      
+
       return result;
     } catch (error) {
       return {
@@ -79,16 +99,19 @@ export class CursorRulesService {
     }
   }
 
-  async getRulesForFile(filePath: string, projectRoot?: string): Promise<{ rules: CursorRule[]; message: string; error?: boolean }> {
+  async getRulesForFile(
+    filePath: string,
+    projectRoot?: string,
+  ): Promise<{ rules: CursorRule[]; message: string; error?: boolean }> {
     try {
       const rootDir = projectRoot || process.cwd();
-      
+
       if (!this.rulesCache.has(rootDir)) {
         await this.loadRules(rootDir);
       }
 
       const rules = this.rulesCache.get(rootDir) || [];
-      
+
       if (rules.length === 0) {
         return {
           rules: [],
@@ -108,7 +131,10 @@ export class CursorRulesService {
 
         const globs = Array.isArray(rule.globs) ? rule.globs : [];
         for (const glob of globs) {
-          if (minimatch(relativePath, glob) || minimatch(basename(filePath), glob)) {
+          if (
+            minimatch(relativePath, glob) ||
+            minimatch(basename(filePath), glob)
+          ) {
             applicableRules.push(rule);
             break;
           }
@@ -123,9 +149,9 @@ export class CursorRulesService {
       }
 
       const rulesText = applicableRules
-        .map(rule => {
+        .map((rule) => {
           const header = `${rule.description} (${rule.file})`;
-          const metadata = rule.alwaysApply 
+          const metadata = rule.alwaysApply
             ? 'Always applies'
             : `Applies to: ${rule.globs.join(', ')}`;
           return `## ${header}\n*${metadata}*\n\n${rule.content}`;

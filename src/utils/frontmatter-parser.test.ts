@@ -6,7 +6,7 @@ describe('frontmatter-parser', () => {
     it('should parse content without frontmatter', () => {
       const content = 'This is plain content without frontmatter';
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({});
       expect(result.content).toBe(content);
     });
@@ -14,7 +14,7 @@ describe('frontmatter-parser', () => {
     it('should parse content with empty frontmatter', () => {
       const content = '---\n---\nThis is the body content';
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({});
       expect(result.content).toBe('This is the body content');
     });
@@ -25,12 +25,12 @@ description: Test description
 title: Test title
 ---
 This is the body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         description: 'Test description',
-        title: 'Test title'
+        title: 'Test title',
       });
       expect(result.content).toBe('This is the body content');
     });
@@ -41,12 +41,12 @@ alwaysApply: true
 enabled: false
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         alwaysApply: true,
-        enabled: false
+        enabled: false,
       });
     });
 
@@ -56,12 +56,12 @@ globs: ["*.ts", "*.js", "src/**/*.tsx"]
 tags: ["javascript", "typescript"]
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         globs: ['*.ts', '*.js', 'src/**/*.tsx'],
-        tags: ['javascript', 'typescript']
+        tags: ['javascript', 'typescript'],
       });
     });
 
@@ -70,10 +70,14 @@ Body content`;
 globs: [*.ts, *.js, src/**/*.tsx]
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
-      expect(result.frontmatter.globs).toEqual(['*.ts', '*.js', 'src/**/*.tsx']);
+
+      expect(result.frontmatter.globs).toEqual([
+        '*.ts',
+        '*.js',
+        'src/**/*.tsx',
+      ]);
     });
 
     it('should handle arrays with quotes in fallback parsing', () => {
@@ -81,10 +85,14 @@ Body content`;
 globs: ["*.ts", '*.js', src/**/*.tsx]
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
-      expect(result.frontmatter.globs).toEqual(['*.ts', '*.js', 'src/**/*.tsx']);
+
+      expect(result.frontmatter.globs).toEqual([
+        '*.ts',
+        '*.js',
+        'src/**/*.tsx',
+      ]);
     });
 
     it('should handle invalid array syntax gracefully', () => {
@@ -92,21 +100,20 @@ Body content`;
 globs: [invalid array syntax]
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       // The parser should handle this as a fallback array with the content
       expect(result.frontmatter.globs).toEqual(['invalid array syntax']);
     });
-
 
     it('should handle content without closing frontmatter delimiter', () => {
       const content = `---
 description: Test
 This is content without closing delimiter`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({});
       expect(result.content).toBe(content);
     });
@@ -123,15 +130,15 @@ This is the rule content with **markdown** formatting.
 
 - Item 1
 - Item 2`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         description: 'Mixed content rule',
         globs: ['*.ts', '*.js'],
         alwaysApply: true,
         priority: '1',
-        nested: ['value1', 'value2']
+        nested: ['value1', 'value2'],
       });
       expect(result.content).toContain('This is the rule content');
       expect(result.content).toContain('- Item 1');
@@ -144,12 +151,12 @@ invalid line without colon
 globs: ["*.ts"]
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         description: 'Valid property',
-        globs: ['*.ts']
+        globs: ['*.ts'],
       });
     });
 
@@ -159,12 +166,12 @@ Body content`;
   globs   : ["*.ts", "*.js"]  
 ---
 Body content`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
         description: 'Test with spaces',
-        globs: ['*.ts', '*.js']
+        globs: ['*.ts', '*.js'],
       });
     });
 
@@ -172,11 +179,11 @@ Body content`;
       const content = `---
 description: Test
 ---`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
-        description: 'Test'
+        description: 'Test',
       });
       expect(result.content).toBe('');
     });
@@ -188,11 +195,11 @@ description: Test
 
 
 This content has multiple leading newlines`;
-      
+
       const result = parseFrontmatter(content);
-      
+
       expect(result.frontmatter).toEqual({
-        description: 'Test'
+        description: 'Test',
       });
       expect(result.content).toBe('This content has multiple leading newlines');
     });

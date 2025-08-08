@@ -22,16 +22,19 @@ export function parseFrontmatter(content: string): ParsedFrontmatter {
   }
 
   const frontmatterLines = lines.slice(1, endIndex);
-  const bodyContent = lines.slice(endIndex + 1).join('\n').trim();
-  
+  const bodyContent = lines
+    .slice(endIndex + 1)
+    .join('\n')
+    .trim();
+
   const frontmatter: Record<string, any> = {};
   for (const line of frontmatterLines) {
     const colonIndex = line.indexOf(':');
     if (colonIndex === -1) continue;
-    
+
     const key = line.slice(0, colonIndex).trim();
     let value: any = line.slice(colonIndex + 1).trim();
-    
+
     // Handle arrays (globs) - much more robust parsing
     if (value.startsWith('[') && value.endsWith(']')) {
       try {
@@ -44,7 +47,8 @@ export function parseFrontmatter(content: string): ParsedFrontmatter {
       } catch (e) {
         // Fallback to manual parsing
         try {
-          value = value.slice(1, -1)
+          value = value
+            .slice(1, -1)
             .split(',')
             .map((item: string) => item.trim().replace(/^["']|["']$/g, ''))
             .filter((item: string) => item.length > 0);
@@ -58,7 +62,7 @@ export function parseFrontmatter(content: string): ParsedFrontmatter {
     } else if (value === 'false') {
       value = false;
     }
-    
+
     frontmatter[key] = value;
   }
 

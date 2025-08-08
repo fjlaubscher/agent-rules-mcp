@@ -29,7 +29,7 @@ export class AgentRulesMCPServer {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     this.cursorRulesService = new CursorRulesService();
@@ -42,7 +42,8 @@ export class AgentRulesMCPServer {
       const tools = [
         {
           name: 'get_cursor_rules',
-          description: 'Get applicable Cursor rules for a specific file or directory',
+          description:
+            'Get applicable Cursor rules for a specific file or directory',
           inputSchema: {
             type: 'object',
             properties: {
@@ -52,7 +53,8 @@ export class AgentRulesMCPServer {
               },
               projectRoot: {
                 type: 'string',
-                description: 'Root directory of the project (optional, defaults to current directory)',
+                description:
+                  'Root directory of the project (optional, defaults to current directory)',
               },
             },
             required: ['filePath'],
@@ -60,13 +62,15 @@ export class AgentRulesMCPServer {
         },
         {
           name: 'load_cursor_rules',
-          description: 'Load and cache all Cursor rules from .cursor/rules directory',
+          description:
+            'Load and cache all Cursor rules from .cursor/rules directory',
           inputSchema: {
             type: 'object',
             properties: {
               projectRoot: {
                 type: 'string',
-                description: 'Root directory of the project (optional, defaults to current directory)',
+                description:
+                  'Root directory of the project (optional, defaults to current directory)',
               },
             },
           },
@@ -79,7 +83,8 @@ export class AgentRulesMCPServer {
             properties: {
               projectRoot: {
                 type: 'string',
-                description: 'Root directory of the project (optional, defaults to current directory)',
+                description:
+                  'Root directory of the project (optional, defaults to current directory)',
               },
             },
           },
@@ -92,7 +97,8 @@ export class AgentRulesMCPServer {
             properties: {
               projectRoot: {
                 type: 'string',
-                description: 'Root directory of the project (optional, defaults to current directory)',
+                description:
+                  'Root directory of the project (optional, defaults to current directory)',
               },
             },
           },
@@ -105,13 +111,14 @@ export class AgentRulesMCPServer {
             properties: {
               projectRoot: {
                 type: 'string',
-                description: 'Root directory of the project (optional, defaults to current directory)',
+                description:
+                  'Root directory of the project (optional, defaults to current directory)',
               },
             },
           },
         },
       ];
-      
+
       return { tools };
     });
 
@@ -122,19 +129,22 @@ export class AgentRulesMCPServer {
       switch (name) {
         case 'load_cursor_rules':
           return this.handleLoadCursorRules(toolArgs?.projectRoot);
-        
+
         case 'get_cursor_rules':
-          return this.handleGetCursorRules(toolArgs?.filePath, toolArgs?.projectRoot);
-        
+          return this.handleGetCursorRules(
+            toolArgs?.filePath,
+            toolArgs?.projectRoot,
+          );
+
         case 'list_cursor_rules':
           return this.handleListCursorRules(toolArgs?.projectRoot);
 
         case 'load_agents':
           return this.handleLoadAgents(toolArgs?.projectRoot);
-        
+
         case 'get_agents':
           return this.handleGetAgents(toolArgs?.projectRoot);
-        
+
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -167,7 +177,10 @@ export class AgentRulesMCPServer {
       };
     }
 
-    const result = await this.cursorRulesService.getRulesForFile(filePath, projectRoot);
+    const result = await this.cursorRulesService.getRulesForFile(
+      filePath,
+      projectRoot,
+    );
     return {
       content: [
         {
@@ -181,7 +194,7 @@ export class AgentRulesMCPServer {
 
   private async handleListCursorRules(projectRoot?: string) {
     const rules = this.cursorRulesService.getCachedRules(projectRoot);
-    
+
     if (rules.length === 0) {
       return {
         content: [
@@ -194,7 +207,10 @@ export class AgentRulesMCPServer {
     }
 
     const rulesList = rules
-      .map(rule => `**${rule.file}**\n${rule.description}\nGlobs: ${rule.globs.join(', ')}\nAlways apply: ${rule.alwaysApply}`)
+      .map(
+        (rule) =>
+          `**${rule.file}**\n${rule.description}\nGlobs: ${rule.globs.join(', ')}\nAlways apply: ${rule.alwaysApply}`,
+      )
       .join('\n\n');
 
     return {

@@ -31,26 +31,26 @@ describe('AgentsService', () => {
       const result = await service.loadAgents(testProjectRoot);
 
       expect(result.error).toBe(true);
-      expect(result.agents).toEqual({});
+      expect(result.agents).toBe(null);
       expect(result.message).toContain('No AGENTS.md file found');
       expect(mockAccess).toHaveBeenCalledWith(
         expect.stringMatching(/[\/\\]test[\/\\]project[\/\\]AGENTS\.md$/),
-        constants.F_OK
+        constants.F_OK,
       );
     });
 
     it('should successfully load AGENTS.md with frontmatter', async () => {
       const mockContent = 'Mock AGENTS.md content';
-      
+
       mockAccess.mockResolvedValue(undefined);
       mockReadFile.mockResolvedValue(mockContent);
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           description: 'Project agent rules and guidelines',
           version: '1.0',
-          author: 'Test Author'
+          author: 'Test Author',
         },
-        content: 'These are the agent guidelines for the project.'
+        content: 'These are the agent guidelines for the project.',
       });
 
       const result = await service.loadAgents(testProjectRoot);
@@ -63,21 +63,23 @@ describe('AgentsService', () => {
         metadata: {
           description: 'Project agent rules and guidelines',
           version: '1.0',
-          author: 'Test Author'
-        }
+          author: 'Test Author',
+        },
       });
-      expect(result.message).toMatch(/Loaded AGENTS\.md from.*[\/\\]test[\/\\]project[\/\\]AGENTS\.md/);
+      expect(result.message).toMatch(
+        /Loaded AGENTS\.md from.*[\/\\]test[\/\\]project[\/\\]AGENTS\.md/,
+      );
       expect(result.message).toContain('Project agent rules and guidelines');
     });
 
     it('should handle AGENTS.md without frontmatter', async () => {
       const mockContent = 'Plain AGENTS.md content without frontmatter';
-      
+
       mockAccess.mockResolvedValue(undefined);
       mockReadFile.mockResolvedValue(mockContent);
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: mockContent
+        content: mockContent,
       });
 
       const result = await service.loadAgents(testProjectRoot);
@@ -87,7 +89,7 @@ describe('AgentsService', () => {
         file: 'AGENTS.md',
         description: 'Agent rules and guidelines',
         content: mockContent,
-        metadata: {}
+        metadata: {},
       });
     });
 
@@ -96,7 +98,7 @@ describe('AgentsService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: { description: 'Test agents' },
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents(testProjectRoot);
@@ -114,24 +116,26 @@ describe('AgentsService', () => {
       const result = await service.loadAgents(testProjectRoot);
 
       expect(result.error).toBe(true);
-      expect(result.message).toContain('Error loading AGENTS.md: Permission denied');
+      expect(result.message).toContain(
+        'Error loading AGENTS.md: Permission denied',
+      );
     });
 
     it('should use current working directory when no project root provided', async () => {
       const currentDir = process.cwd();
-      
+
       mockAccess.mockResolvedValue(undefined);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents();
 
       expect(mockAccess).toHaveBeenCalledWith(
         expect.stringContaining('AGENTS.md'),
-        constants.F_OK
+        constants.F_OK,
       );
     });
   });
@@ -143,9 +147,10 @@ describe('AgentsService', () => {
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           description: 'Test agent rules',
-          version: '2.0'
+          version: '2.0',
         },
-        content: 'These are test agent guidelines with **markdown** formatting.'
+        content:
+          'These are test agent guidelines with **markdown** formatting.',
       });
 
       await service.loadAgents(testProjectRoot);
@@ -164,15 +169,15 @@ describe('AgentsService', () => {
 
     it('should load agents automatically if not cached', async () => {
       service.clearCache();
-      
+
       // Reset mocks for the second load
       mockAccess.mockResolvedValue(undefined);
       mockReadFile.mockResolvedValue('Auto-loaded content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
-          description: 'Auto-loaded agents'
+          description: 'Auto-loaded agents',
         },
-        content: 'Auto-loaded agent content'
+        content: 'Auto-loaded agent content',
       });
 
       const result = await service.getAgents(testProjectRoot);
@@ -184,7 +189,7 @@ describe('AgentsService', () => {
 
     it('should return error when loading fails and no cache exists', async () => {
       service.clearCache();
-      
+
       mockAccess.mockRejectedValue(new Error('File not found'));
 
       const result = await service.getAgents(testProjectRoot);
@@ -197,7 +202,7 @@ describe('AgentsService', () => {
     it('should return error when loading fails and no cache exists', async () => {
       const emptyService = new AgentsService();
       mockAccess.mockRejectedValue(new Error('File not found'));
-      
+
       const result = await emptyService.getAgents('/nonexistent/project');
 
       expect(result.error).toBe(true);
@@ -216,7 +221,7 @@ describe('AgentsService', () => {
 
       expect(result.error).toBe(true);
       expect(result.message).toContain('Error getting AGENTS.md:');
-      
+
       // Restore original cwd
       process.cwd = originalCwd;
     });
@@ -240,7 +245,7 @@ describe('AgentsService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: { description: 'Cached agents' },
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents(testProjectRoot);
@@ -261,11 +266,11 @@ describe('AgentsService', () => {
       mockParseFrontmatter
         .mockReturnValueOnce({
           frontmatter: { description: 'Project 1 agents' },
-          content: 'content1'
+          content: 'content1',
         })
         .mockReturnValueOnce({
           frontmatter: { description: 'Project 2 agents' },
-          content: 'content2'
+          content: 'content2',
         });
 
       await service.loadAgents(project1);
@@ -285,7 +290,7 @@ describe('AgentsService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents(testProjectRoot);
@@ -303,14 +308,14 @@ describe('AgentsService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents(project1);
       await service.loadAgents(project2);
-      
+
       service.clearCache();
-      
+
       expect(service.getCachedAgents(project1)).toBeNull();
       expect(service.getCachedAgents(project2)).toBeNull();
     });
@@ -323,14 +328,14 @@ describe('AgentsService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: { description: 'Test' },
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadAgents(project1);
       await service.loadAgents(project2);
-      
+
       service.clearCache(project1);
-      
+
       expect(service.getCachedAgents(project1)).toBeNull();
       expect(service.getCachedAgents(project2)).toBeDefined();
     });

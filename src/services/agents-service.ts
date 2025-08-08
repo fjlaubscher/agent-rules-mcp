@@ -12,11 +12,13 @@ export interface AgentRule {
 export class AgentsService {
   private agentsCache = new Map<string, AgentRule>();
 
-  async loadAgents(projectRoot?: string): Promise<{ agents: AgentRule | null; message: string; error?: boolean }> {
+  async loadAgents(
+    projectRoot?: string,
+  ): Promise<{ agents: AgentRule | null; message: string; error?: boolean }> {
     try {
       const rootDir = projectRoot || process.cwd();
       const agentsPath = join(rootDir, 'AGENTS.md');
-      
+
       try {
         await access(agentsPath, constants.F_OK);
       } catch (error) {
@@ -29,7 +31,7 @@ export class AgentsService {
 
       const content = await readFile(agentsPath, 'utf-8');
       const { frontmatter, content: agentContent } = parseFrontmatter(content);
-      
+
       const agent: AgentRule = {
         file: 'AGENTS.md',
         description: frontmatter.description || 'Agent rules and guidelines',
@@ -51,10 +53,12 @@ export class AgentsService {
     }
   }
 
-  async getAgents(projectRoot?: string): Promise<{ agents: AgentRule | null; message: string; error?: boolean }> {
+  async getAgents(
+    projectRoot?: string,
+  ): Promise<{ agents: AgentRule | null; message: string; error?: boolean }> {
     try {
       const rootDir = projectRoot || process.cwd();
-      
+
       if (!this.agentsCache.has(rootDir)) {
         const result = await this.loadAgents(rootDir);
         if (result.error) {
@@ -67,7 +71,7 @@ export class AgentsService {
       }
 
       const agents = this.agentsCache.get(rootDir);
-      
+
       if (!agents) {
         return {
           agents: null,

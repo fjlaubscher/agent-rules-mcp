@@ -44,23 +44,23 @@ describe('CursorRulesService', () => {
       mockReadFile
         .mockResolvedValueOnce(mockContent1)
         .mockResolvedValueOnce(mockContent2);
-      
+
       mockParseFrontmatter
         .mockReturnValueOnce({
           frontmatter: {
             description: 'TypeScript rules',
             globs: ['*.ts', '*.tsx'],
-            alwaysApply: false
+            alwaysApply: false,
           },
-          content: 'TypeScript specific rules'
+          content: 'TypeScript specific rules',
         })
         .mockReturnValueOnce({
           frontmatter: {
             description: 'Global rules',
             globs: [],
-            alwaysApply: true
+            alwaysApply: true,
           },
-          content: 'Always apply these rules'
+          content: 'Always apply these rules',
         });
 
       const result = await service.loadRules(testProjectRoot);
@@ -72,14 +72,14 @@ describe('CursorRulesService', () => {
         description: 'TypeScript rules',
         globs: ['*.ts', '*.tsx'],
         alwaysApply: false,
-        content: 'TypeScript specific rules'
+        content: 'TypeScript specific rules',
       });
       expect(result.rules[1]).toEqual({
         file: 'rule2.mdc',
         description: 'Global rules',
         globs: [],
         alwaysApply: true,
-        content: 'Always apply these rules'
+        content: 'Always apply these rules',
       });
       expect(result.message).toContain('Loaded 2 rule files');
     });
@@ -92,7 +92,7 @@ describe('CursorRulesService', () => {
       mockReadFile.mockResolvedValue(mockContent);
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'Simple rule content'
+        content: 'Simple rule content',
       });
 
       const result = await service.loadRules(testProjectRoot);
@@ -104,7 +104,7 @@ describe('CursorRulesService', () => {
         description: 'No description',
         globs: [],
         alwaysApply: false,
-        content: 'Simple rule content'
+        content: 'Simple rule content',
       });
     });
 
@@ -115,9 +115,9 @@ describe('CursorRulesService', () => {
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           globs: '*.js',
-          description: 'JS rules'
+          description: 'JS rules',
         },
-        content: 'JS content'
+        content: 'JS content',
       });
 
       const result = await service.loadRules(testProjectRoot);
@@ -127,7 +127,6 @@ describe('CursorRulesService', () => {
 
     it('should skip files that fail to read and continue with others', async () => {
       const mockFiles = ['good.mdc', 'bad.mdc', 'another.mdc'];
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockReaddir.mockResolvedValue(mockFiles);
       mockReadFile
@@ -138,23 +137,22 @@ describe('CursorRulesService', () => {
       mockParseFrontmatter
         .mockReturnValueOnce({
           frontmatter: { description: 'Good rule' },
-          content: 'good content'
+          content: 'good content',
         })
         .mockReturnValueOnce({
           frontmatter: { description: 'Another rule' },
-          content: 'another content'
+          content: 'another content',
         });
 
       const result = await service.loadRules(testProjectRoot);
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(2);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error reading rule file bad.mdc:'),
-        'Permission denied'
+      expect(result.fileErrors).toHaveLength(1);
+      expect(result.fileErrors?.[0]).toContain(
+        'Error reading rule file bad.mdc: Permission denied',
       );
-
-      consoleErrorSpy.mockRestore();
+      expect(result.message).toContain('Warnings:');
     });
 
     it('should cache rules by project root', async () => {
@@ -163,7 +161,7 @@ describe('CursorRulesService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadRules(testProjectRoot);
@@ -199,32 +197,35 @@ describe('CursorRulesService', () => {
           frontmatter: {
             description: 'TypeScript rules',
             globs: ['*.ts', '*.tsx'],
-            alwaysApply: false
+            alwaysApply: false,
           },
-          content: 'TypeScript specific rules'
+          content: 'TypeScript specific rules',
         })
         .mockReturnValueOnce({
           frontmatter: {
             description: 'Global rules',
             globs: [],
-            alwaysApply: true
+            alwaysApply: true,
           },
-          content: 'Always apply these rules'
+          content: 'Always apply these rules',
         })
         .mockReturnValueOnce({
           frontmatter: {
             description: 'React rules',
             globs: ['**/components/**/*.tsx', '**/pages/**/*.tsx'],
-            alwaysApply: false
+            alwaysApply: false,
           },
-          content: 'React component rules'
+          content: 'React component rules',
         });
 
       await service.loadRules(testProjectRoot);
     });
 
     it('should return rules that always apply', async () => {
-      const result = await service.getRulesForFile('/test/project/src/utils/helper.js', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/project/src/utils/helper.js',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(1);
@@ -233,24 +234,39 @@ describe('CursorRulesService', () => {
     });
 
     it('should return rules matching file extension glob', async () => {
-      const result = await service.getRulesForFile('/test/project/src/component.tsx', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/project/src/component.tsx',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(2); // TypeScript + Global rules
-      expect(result.rules.some(r => r.description === 'TypeScript rules')).toBe(true);
-      expect(result.rules.some(r => r.description === 'Global rules')).toBe(true);
+      expect(
+        result.rules.some((r) => r.description === 'TypeScript rules'),
+      ).toBe(true);
+      expect(result.rules.some((r) => r.description === 'Global rules')).toBe(
+        true,
+      );
     });
 
     it('should return rules matching path glob patterns', async () => {
-      const result = await service.getRulesForFile('/test/project/src/components/Button.tsx', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/project/src/components/Button.tsx',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(3); // All rules match
-      expect(result.rules.some(r => r.description === 'React rules')).toBe(true);
+      expect(result.rules.some((r) => r.description === 'React rules')).toBe(
+        true,
+      );
     });
 
     it('should return only global rules when no specific patterns match', async () => {
-      const result = await service.getRulesForFile('/test/project/src/styles.css', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/project/src/styles.css',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(1);
@@ -259,19 +275,22 @@ describe('CursorRulesService', () => {
 
     it('should load rules automatically if not cached', async () => {
       service.clearCache();
-      
+
       // Reset mocks for the second load
       mockReaddir.mockResolvedValue(['rule.mdc']);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           description: 'Auto-loaded rule',
-          alwaysApply: true
+          alwaysApply: true,
         },
-        content: 'content'
+        content: 'content',
       });
 
-      const result = await service.getRulesForFile('/test/file.js', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/file.js',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(1);
@@ -282,27 +301,35 @@ describe('CursorRulesService', () => {
       service.clearCache();
       mockReaddir.mockRejectedValue(new Error('No directory'));
 
-      const result = await service.getRulesForFile('/test/file.js', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/file.js',
+        testProjectRoot,
+      );
 
       expect(result.error).toBe(true);
-      expect(result.message).toContain('No Cursor rules found. Run load_cursor_rules first.');
+      expect(result.message).toContain(
+        'No Cursor rules found. Run load_cursor_rules first.',
+      );
     });
 
     it('should handle no applicable rules gracefully', async () => {
       service.clearCache();
-      
+
       mockReaddir.mockResolvedValue(['specific.mdc']);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           description: 'Specific rule',
           globs: ['*.very-specific-extension'],
-          alwaysApply: false
+          alwaysApply: false,
         },
-        content: 'content'
+        content: 'content',
       });
 
-      const result = await service.getRulesForFile('/test/file.js', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/file.js',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(0);
@@ -320,26 +347,29 @@ describe('CursorRulesService', () => {
 
       expect(result.error).toBe(true);
       expect(result.message).toContain('Error getting cursor rules:');
-      
+
       // Restore original cwd
       process.cwd = originalCwd;
     });
 
     it('should match basename for simple glob patterns', async () => {
       service.clearCache();
-      
+
       mockReaddir.mockResolvedValue(['package-json.mdc']);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
           description: 'Package.json rule',
           globs: ['package.json'],
-          alwaysApply: false
+          alwaysApply: false,
         },
-        content: 'Package.json specific rules'
+        content: 'Package.json specific rules',
       });
 
-      const result = await service.getRulesForFile('/test/project/package.json', testProjectRoot);
+      const result = await service.getRulesForFile(
+        '/test/project/package.json',
+        testProjectRoot,
+      );
 
       expect(result.error).toBeFalsy();
       expect(result.rules).toHaveLength(1);
@@ -358,7 +388,7 @@ describe('CursorRulesService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: { description: 'Test rule' },
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadRules(testProjectRoot);
@@ -375,7 +405,7 @@ describe('CursorRulesService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadRules(testProjectRoot);
@@ -390,14 +420,14 @@ describe('CursorRulesService', () => {
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
-        content: 'content'
+        content: 'content',
       });
 
       await service.loadRules(testProjectRoot);
       await service.loadRules('/other/project');
-      
+
       service.clearCache();
-      
+
       expect(service.getCachedRules(testProjectRoot)).toEqual([]);
       expect(service.getCachedRules('/other/project')).toEqual([]);
     });
