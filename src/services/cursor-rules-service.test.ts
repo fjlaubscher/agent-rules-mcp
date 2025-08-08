@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { readFile, readdir } from 'fs/promises';
 import { CursorRulesService } from './cursor-rules-service';
 
@@ -40,7 +41,7 @@ describe('CursorRulesService', () => {
       const mockContent1 = 'Mock content 1';
       const mockContent2 = 'Mock content 2';
 
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile
         .mockResolvedValueOnce(mockContent1)
         .mockResolvedValueOnce(mockContent2);
@@ -88,7 +89,7 @@ describe('CursorRulesService', () => {
       const mockFiles = ['simple.mdc'];
       const mockContent = 'Simple rule content';
 
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile.mockResolvedValue(mockContent);
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
@@ -110,7 +111,7 @@ describe('CursorRulesService', () => {
 
     it('should handle string globs by converting to array', async () => {
       const mockFiles = ['rule.mdc'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
@@ -128,7 +129,7 @@ describe('CursorRulesService', () => {
     it('should skip files that fail to read and continue with others', async () => {
       const mockFiles = ['good.mdc', 'bad.mdc', 'another.mdc'];
 
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile
         .mockResolvedValueOnce('good content')
         .mockRejectedValueOnce(new Error('Permission denied'))
@@ -157,7 +158,7 @@ describe('CursorRulesService', () => {
 
     it('should cache rules by project root', async () => {
       const mockFiles = ['rule.mdc'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
@@ -173,7 +174,7 @@ describe('CursorRulesService', () => {
 
     it('should handle general errors gracefully', async () => {
       // Mock readdir to return files, but then throw an error during processing
-      mockReaddir.mockResolvedValue(['rule.mdc']);
+      mockReaddir.mockResolvedValue(['rule.mdc'] as any);
       mockReadFile.mockRejectedValue(new Error('Unexpected error'));
 
       const result = await service.loadRules(testProjectRoot);
@@ -186,7 +187,7 @@ describe('CursorRulesService', () => {
   describe('getRulesForFile', () => {
     beforeEach(async () => {
       const mockFiles = ['typescript.mdc', 'global.mdc', 'react.mdc'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      mockReaddir.mockResolvedValue(mockFiles as any);
       mockReadFile
         .mockResolvedValueOnce('ts content')
         .mockResolvedValueOnce('global content')
@@ -277,7 +278,7 @@ describe('CursorRulesService', () => {
       service.clearCache();
 
       // Reset mocks for the second load
-      mockReaddir.mockResolvedValue(['rule.mdc']);
+      mockReaddir.mockResolvedValue(['rule.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
@@ -315,7 +316,7 @@ describe('CursorRulesService', () => {
     it('should handle no applicable rules gracefully', async () => {
       service.clearCache();
 
-      mockReaddir.mockResolvedValue(['specific.mdc']);
+      mockReaddir.mockResolvedValue(['specific.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
@@ -355,7 +356,7 @@ describe('CursorRulesService', () => {
     it('should match basename for simple glob patterns', async () => {
       service.clearCache();
 
-      mockReaddir.mockResolvedValue(['package-json.mdc']);
+      mockReaddir.mockResolvedValue(['package-json.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {
@@ -384,7 +385,7 @@ describe('CursorRulesService', () => {
     });
 
     it('should return cached rules', async () => {
-      mockReaddir.mockResolvedValue(['rule.mdc']);
+      mockReaddir.mockResolvedValue(['rule.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: { description: 'Test rule' },
@@ -401,7 +402,7 @@ describe('CursorRulesService', () => {
 
   describe('clearCache', () => {
     it('should clear specific project cache', async () => {
-      mockReaddir.mockResolvedValue(['rule.mdc']);
+      mockReaddir.mockResolvedValue(['rule.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
@@ -416,7 +417,7 @@ describe('CursorRulesService', () => {
     });
 
     it('should clear all cache when no project root specified', async () => {
-      mockReaddir.mockResolvedValue(['rule.mdc']);
+      mockReaddir.mockResolvedValue(['rule.mdc'] as any);
       mockReadFile.mockResolvedValue('content');
       mockParseFrontmatter.mockReturnValue({
         frontmatter: {},
