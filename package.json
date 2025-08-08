@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node index.mjs",
     "test": "vitest run",
-    "format": "prettier --write ."
+    "format": "prettier --write src"
   },
   "keywords": [],
   "author": {

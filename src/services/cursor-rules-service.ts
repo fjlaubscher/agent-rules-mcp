@@ -14,9 +14,7 @@ export interface CursorRule {
 export class CursorRulesService {
   private rulesCache = new Map<string, CursorRule[]>();
 
-  async loadRules(
-    projectRoot?: string,
-  ): Promise<{
+  async loadRules(projectRoot?: string): Promise<{
     rules: CursorRule[];
     message: string;
     error?: boolean;
