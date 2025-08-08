@@ -1,0 +1,32 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "NodeJS + Typescript boilerplate",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "build": "tsc",
+    "start": "node index.mjs",
+    "test": "vitest run",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Francois Laubscher",
+    "email": "francoisjlaubscher@gmail.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
+}
