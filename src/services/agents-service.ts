@@ -12,7 +12,7 @@ export interface AgentRule {
 export class AgentsService {
   private agentsCache = new Map<string, AgentRule>();
 
-  async loadAgents(projectRoot?: string): Promise<{ agents: AgentRule; message: string; error?: boolean }> {
+  async loadAgents(projectRoot?: string): Promise<{ agents: AgentRule | null; message: string; error?: boolean }> {
     try {
       const rootDir = projectRoot || process.cwd();
       const agentsPath = join(rootDir, 'AGENTS.md');
@@ -21,7 +21,7 @@ export class AgentsService {
         await access(agentsPath, constants.F_OK);
       } catch (error) {
         return {
-          agents: {} as AgentRule,
+          agents: null,
           message: `No AGENTS.md file found at ${agentsPath}`,
           error: true,
         };
@@ -44,7 +44,7 @@ export class AgentsService {
       return { agents: agent, message };
     } catch (error) {
       return {
-        agents: {} as AgentRule,
+        agents: null,
         message: `Error loading AGENTS.md: ${(error as Error).message}`,
         error: true,
       };

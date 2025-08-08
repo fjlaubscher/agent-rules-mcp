@@ -14,7 +14,7 @@ export interface CursorRule {
 export class CursorRulesService {
   private rulesCache = new Map<string, CursorRule[]>();
 
-  async loadRules(projectRoot?: string): Promise<{ rules: CursorRule[]; message: string; error?: boolean }> {
+  async loadRules(projectRoot?: string): Promise<{ rules: CursorRule[]; message: string; error?: boolean; fileErrors?: string[] }> {
     try {
       const rootDir = projectRoot || process.cwd();
       const rulesDir = join(rootDir, '.cursor', 'rules');
@@ -32,6 +32,7 @@ export class CursorRulesService {
 
       const mdcFiles = files.filter(file => extname(file) === '.mdc');
       const rules: CursorRule[] = [];
+      const fileErrors: string[] = [];
 
       for (const file of mdcFiles) {
         const filePath = join(rulesDir, file);
@@ -49,17 +50,26 @@ export class CursorRulesService {
             content: ruleContent,
           });
         } catch (error) {
-          console.error(`Error reading rule file ${file}:`, (error as Error).message);
+          fileErrors.push(`Error reading rule file ${file}: ${(error as Error).message}`);
         }
       }
 
       this.rulesCache.set(rootDir, rules);
 
-      const message = `Loaded ${rules.length} rule files from ${rulesDir}:\n\n${rules
+      let message = `Loaded ${rules.length} rule files from ${rulesDir}:\n\n${rules
         .map(rule => `• ${rule.file}: ${rule.description}\n  Globs: ${rule.globs.join(', ')}\n  Always apply: ${rule.alwaysApply}`)
         .join('\n\n')}`;
 
-      return { rules, message };
+      if (fileErrors.length > 0) {
+        message += `\n\nWarnings:\n${fileErrors.map(err => `• ${err}`).join('\n')}`;
+      }
+
+      const result: { rules: CursorRule[]; message: string; error?: boolean; fileErrors?: string[] } = { rules, message };
+      if (fileErrors.length > 0) {
+        result.fileErrors = fileErrors;
+      }
+      
+      return result;
     } catch (error) {
       return {
         rules: [],

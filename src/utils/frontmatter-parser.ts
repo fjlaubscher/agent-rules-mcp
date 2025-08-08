@@ -50,7 +50,6 @@ export function parseFrontmatter(content: string): ParsedFrontmatter {
             .filter((item: string) => item.length > 0);
         } catch (e2) {
           // If all parsing fails, make it an empty array
-          console.error('Failed to parse globs array:', value, e2);
           value = [];
         }
       }

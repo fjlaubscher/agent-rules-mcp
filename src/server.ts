@@ -39,7 +39,6 @@ export class AgentRulesMCPServer {
 
   private setupToolHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      console.error('ListTools request received');
       const tools = [
         {
           name: 'get_cursor_rules',
@@ -113,7 +112,6 @@ export class AgentRulesMCPServer {
         },
       ];
       
-      console.error('Returning tools:', JSON.stringify(tools, null, 2));
       return { tools };
     });
 
@@ -238,7 +236,6 @@ export class AgentRulesMCPServer {
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Agent Rules MCP server running on stdio');
   }
 }
 
