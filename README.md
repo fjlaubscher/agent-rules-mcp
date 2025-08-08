@@ -1,78 +1,172 @@
-# Node TypeScript Template
+# Agent Rules MCP Server
 
-This repository serves as a starter template for building Node.js applications using TypeScript. It includes essential configurations and tools to streamline development and testing.
-
-## Available Scripts
-
-- `pnpm build` – Compiles TypeScript files into JavaScript and outputs them to the `dist` folder.
-- `pnpm dev` – Starts the application in watch mode using `tsx` for live reloading.
-- `pnpm start` – Runs the compiled JavaScript output from the `dist` folder.
-- `pnpm test` – Executes tests using Vitest.
-- `pnpm format` – Formats code files using Prettier.
-
-## Requirements
-
-- Node.js 22 or later
-- TypeScript
-
-The entry point for the application is `src/index.ts`. All TypeScript source files should reside in the `src` directory.
+A Model Context Protocol (MCP) server that provides tools for retrieving and managing Cursor rules and AGENTS.md files. This server enables seamless integration with Claude Code to access project-specific coding guidelines and agent instructions.
 
 ## Features
 
-This template includes:
+This MCP server provides the following tools:
 
-- **TypeScript**: For type-safe development.
-- **Vitest**: A fast and lightweight testing framework.
-- **Dotenv**: For managing environment variables via `.env` files.
-- **Prettier**: For consistent code formatting.
+- **`load_cursor_rules`** - Load and cache all Cursor rules from `.cursor/rules` directory
+- **`get_cursor_rules`** - Get applicable Cursor rules for a specific file path
+- **`list_cursor_rules`** - List all available Cursor rules files
+- **`load_agents`** - Load and cache AGENTS.md file from project root
+- **`get_agents`** - Get AGENTS.md content for the current project
 
-## Getting Started
+## Setup with Claude Code
 
-1. Install dependencies:
+### Prerequisites
 
+- Node.js 22 or later
+- pnpm package manager
+- Claude Code CLI
+
+### Installation
+
+1. **Clone and build the server:**
+
+   ```bash
+   git clone <repository-url>
+   cd agent-rules-mcp
+   pnpm install
+   pnpm build
+   ```
+
+2. **Configure Claude Code MCP settings:**
+
+   Add the server to your Claude Code configuration file (`~/.config/claude-code/mcp-settings.json` on Linux/macOS or `%APPDATA%\claude-code\mcp-settings.json` on Windows):
+
+   ```json
+   {
+     "mcpServers": {
+       "agent-rules": {
+         "command": "node",
+         "args": ["/path/to/agent-rules-mcp/dist/index.js"]
+       }
+     }
+   }
+   ```
+
+   Replace `/path/to/agent-rules-mcp` with the actual path to this repository.
+
+3. **Restart Claude Code** to load the MCP server.
+
+### Usage
+
+Once configured, the server will automatically be available in Claude Code. The server provides access to:
+
+#### Cursor Rules (`.cursor/rules/*.mdc`)
+
+Create Cursor rule files in your project's `.cursor/rules/` directory with frontmatter metadata:
+
+```markdown
+---
+description: "TypeScript coding standards"
+globs: ["*.ts", "*.tsx"]
+alwaysApply: false
+---
+
+Your TypeScript coding rules and guidelines here...
+```
+
+#### AGENTS.md Files
+
+Create an `AGENTS.md` file in your project root with agent instructions:
+
+```markdown
+---
+description: "Project-specific agent guidelines"
+version: "1.0"
+---
+
+# Project Agent Rules
+
+Your agent-specific instructions and guidelines here...
+```
+
+### Available Commands
+
+- `pnpm build` – Compiles TypeScript to JavaScript for the MCP server
+- `pnpm start` – Runs the compiled MCP server (used by Claude Code)
+- `pnpm test` – Executes tests using Vitest
+- `pnpm format` – Formats code using Prettier
+
+## Architecture
+
+The server follows a service-oriented architecture:
+
+- **AgentRulesMCPServer** (`src/server.ts`) - Main MCP server handling tool registration and requests
+- **CursorRulesService** (`src/services/cursor-rules-service.ts`) - Manages Cursor rules with glob pattern matching
+- **AgentsService** (`src/services/agents-service.ts`) - Handles AGENTS.md file loading and caching
+- **frontmatter-parser** (`src/utils/frontmatter-parser.ts`) - YAML frontmatter parsing utility
+
+## Development
+
+### Getting Started
+
+1. **Install dependencies:**
    ```bash
    pnpm install
    ```
 
-2. Start development:
-
-   ```bash
-   pnpm dev
-   ```
-
-3. Build the project:
-
-   ```bash
-   pnpm build
-   ```
-
-4. Run tests:
+2. **Run tests:**
    ```bash
    pnpm test
    ```
 
+3. **Format code:**
+   ```bash
+   pnpm format
+   ```
+
+4. **Build for production:**
+   ```bash
+   pnpm build
+   ```
+
+### Technology Stack
+
+- **TypeScript** - Type-safe development
+- **Model Context Protocol SDK** - MCP server implementation
+- **Vitest** - Fast testing framework
+- **Prettier** - Code formatting
+
 ## Project Structure
 
-| File/Folder           | Description                                                               |
-| --------------------- | ------------------------------------------------------------------------- |
-| `index.mjs`           | Entry point for the Node.js runtime, sets up the TypeScript paths loader. |
-| `LICENSE`             | License file for the project.                                             |
-| `package.json`        | Contains project metadata and dependencies.                               |
-| `README.md`           | Project documentation.                                                    |
-| `ts-paths-loader.mjs` | Loader for resolving TypeScript path aliases at runtime.                  |
-| `tsconfig.json`       | TypeScript configuration file, including path alias definitions.          |
-| `vitest.config.ts`    | Configuration for Vitest testing framework.                               |
-| `vitest.setup.ts`     | Setup file for Vitest tests.                                              |
-| `src/*`               | All TypeScript source code goes here.                                     |
+```
+agent-rules-mcp/
+├── src/
+│   ├── server.ts              # Main MCP server implementation
+│   ├── index.ts               # Server entry point
+│   ├── services/
+│   │   ├── cursor-rules-service.ts    # Cursor rules management
+│   │   └── agents-service.ts          # AGENTS.md file management
+│   └── utils/
+│       └── frontmatter-parser.ts      # YAML frontmatter parsing
+├── dist/                      # Compiled JavaScript output
+├── .github/workflows/         # CI/CD workflows
+├── CLAUDE.md                  # Claude Code project instructions
+├── README.md                  # This file
+└── package.json              # Project configuration
+```
 
-## Loader Functionality
+## Error Handling
 
-The `ts-paths-loader.mjs` file is a critical component of this template. It ensures that TypeScript path aliases defined in `tsconfig.json` are resolved correctly at runtime. Without this loader, Node.js would not recognize these aliases, leading to module resolution errors.
+The server implements production-ready error handling:
 
-### Why is it Necessary?
-
-TypeScript allows developers to define custom path aliases in `tsconfig.json` to simplify imports and improve code organization. However, these aliases are not natively supported by Node.js. The loader bridges this gap by dynamically mapping the aliases to their corresponding file paths during runtime, ensuring seamless compatibility between TypeScript and Node.js.
+- **Structured Error Reporting** - Errors are returned as structured data rather than logged to console
+- **Graceful Degradation** - Individual file errors don't prevent processing of other files
+- **Detailed Error Messages** - Clear, actionable error messages for debugging
+- **Type Safety** - Consistent null handling and proper TypeScript types
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests to improve this template.
+Contributions are welcome! Please ensure all tests pass and code is properly formatted:
+
+```bash
+pnpm test
+pnpm format
+```
+
+## License
+
+This project is open source and available under the terms specified in the LICENSE file.
