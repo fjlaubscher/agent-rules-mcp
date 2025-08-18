@@ -1,187 +1,89 @@
 # Agent Rules MCP Server
 
-A Model Context Protocol (MCP) server that provides tools for retrieving and managing Cursor rules and AGENTS.md files. This server enables seamless integration with Claude Code to access project-specific coding guidelines and agent instructions.
+A Model Context Protocol (MCP) server that provides Claude Code access to project-specific Cursor rules and AGENTS.md files.
 
 ## Features
 
-This MCP server provides the following tools:
-
-- **`load_cursor_rules`** - Load and cache all Cursor rules from `.cursor/rules` directory
-- **`get_cursor_rules`** - Get applicable Cursor rules for a specific file path
-- **`list_cursor_rules`** - List all available Cursor rules files
-- **`load_agents`** - Load and cache AGENTS.md file from project root
-- **`get_agents`** - Get AGENTS.md content for the current project
+- Load and filter Cursor rules from `.cursor/rules/*.mdc` files
+- Access AGENTS.md project instructions
+- Smart file matching with glob patterns
+- Automatic caching for performance
 
 ## Installation
 
-### Prerequisites
+**Prerequisites:** Node.js 22+ and Claude Code CLI
 
-- Node.js 22 or later
-- Claude Code CLI
-
-### Install as Package
+### Option 1: Project-Level (Recommended)
 
 ```bash
 npm install -D @fjlaubscher/agent-rules-mcp
 ```
 
-### Configure Claude Code
+Create `.mcp.json` in your project root:
 
-Add the server to your Claude Code configuration file (`~/.config/claude-code/mcp-settings.json` on Linux/macOS or `%APPDATA%\claude-code\mcp-settings.json` on Windows):
+```json
+{
+  "mcpServers": {
+    "agent-rules": {
+      "command": "node",
+      "args": ["./node_modules/@fjlaubscher/agent-rules-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+### Option 2: Global Configuration
+
+Add to Claude Code's `mcp-settings.json`:
 
 ```json
 {
   "mcpServers": {
     "agent-rules": {
       "command": "npx",
-      "args": ["agent-rules-mcp"]
+      "args": ["@fjlaubscher/agent-rules-mcp"]
     }
   }
 }
 ```
 
-Restart Claude Code to load the MCP server.
+**Note:** Restart Claude Code after configuration changes.
 
-### Alternative: Development Setup
+## Usage
 
-1. **Clone and install:**
+The server automatically detects and provides access to existing project conventions:
 
-   ```bash
-   git clone <repository-url>
-   cd agent-rules-mcp
-   pnpm install
-   ```
+- **Cursor Rules**: If you have `.cursor/rules/*.mdc` files, they'll be available with glob pattern matching
+- **AGENTS.md**: If you have `AGENTS.md` files (at project root or directory level), they'll be accessible
 
-2. **Configure Claude Code with local path:**
+### Adding MCP Tools to Your CLAUDE.md
 
-   ```json
-   {
-     "mcpServers": {
-       "agent-rules": {
-         "command": "node",
-         "args": ["/path/to/agent-rules-mcp/index.ts"]
-       }
-     }
-   }
-   ```
-
-### Usage
-
-Once configured, the server will automatically be available in Claude Code. The server provides access to:
-
-#### Cursor Rules (`.cursor/rules/*.mdc`)
-
-Create Cursor rule files in your project's `.cursor/rules/` directory with frontmatter metadata:
+To help Claude Code use these tools automatically, add this to your project's `CLAUDE.md`:
 
 ```markdown
----
-description: "TypeScript coding standards"
-globs: ["*.ts", "*.tsx"]
-alwaysApply: false
----
+## Available MCP Tools
 
-Your TypeScript coding rules and guidelines here...
+- Use `load_cursor_rules` and `get_cursor_rules` for Cursor rules (if present)
+- Use `get_agents` for AGENTS.md instructions (searches current directory up to project root)
 ```
-
-#### AGENTS.md Files
-
-Create an `AGENTS.md` file in your project root with agent instructions:
-
-```markdown
----
-description: "Project-specific agent guidelines"
-version: "1.0"
----
-
-# Project Agent Rules
-
-Your agent-specific instructions and guidelines here...
-```
-
-### Available Commands
-
-- `pnpm build` – Compiles TypeScript to JavaScript for the MCP server
-- `pnpm start` – Runs the compiled MCP server (used by Claude Code)
-- `pnpm test` – Executes tests using Vitest
-- `pnpm format` – Formats code using Prettier
-
-## Architecture
-
-The server follows a service-oriented architecture:
-
-- **AgentRulesMCPServer** (`src/server.ts`) - Main MCP server handling tool registration and requests
-- **CursorRulesService** (`src/services/cursor-rules-service.ts`) - Manages Cursor rules with glob pattern matching
-- **AgentsService** (`src/services/agents-service.ts`) - Handles AGENTS.md file loading and caching
-- **frontmatter-parser** (`src/utils/frontmatter-parser.ts`) - YAML frontmatter parsing utility
 
 ## Development
 
-### Getting Started
+```bash
+# Install dependencies
+pnpm install
 
-1. **Install dependencies:**
-   ```bash
-   pnpm install
-   ```
+# Run tests  
+pnpm test
 
-2. **Run tests:**
-   ```bash
-   pnpm test
-   ```
-
-3. **Format code:**
-   ```bash
-   pnpm format
-   ```
-
-4. **Build for production:**
-   ```bash
-   pnpm build
-   ```
-
-### Technology Stack
-
-- **TypeScript** - Type-safe development
-- **Model Context Protocol SDK** - MCP server implementation
-- **Vitest** - Fast testing framework
-- **Prettier** - Code formatting
-
-## Project Structure
-
+# Build for production
+pnpm build
 ```
-agent-rules-mcp/
-├── src/
-│   ├── server.ts              # Main MCP server implementation
-│   ├── index.ts               # Server entry point
-│   ├── services/
-│   │   ├── cursor-rules-service.ts    # Cursor rules management
-│   │   └── agents-service.ts          # AGENTS.md file management
-│   └── utils/
-│       └── frontmatter-parser.ts      # YAML frontmatter parsing
-├── dist/                      # Compiled JavaScript output
-├── .github/workflows/         # CI/CD workflows
-├── CLAUDE.md                  # Claude Code project instructions
-├── README.md                  # This file
-└── package.json              # Project configuration
-```
-
-## Error Handling
-
-The server implements production-ready error handling:
-
-- **Structured Error Reporting** - Errors are returned as structured data rather than logged to console
-- **Graceful Degradation** - Individual file errors don't prevent processing of other files
-- **Detailed Error Messages** - Clear, actionable error messages for debugging
-- **Type Safety** - Consistent null handling and proper TypeScript types
 
 ## Contributing
 
-Contributions are welcome! Please ensure all tests pass and code is properly formatted:
+Contributions welcome! Ensure tests pass and code is formatted:
 
 ```bash
-pnpm test
-pnpm format
+pnpm test && pnpm format
 ```
-
-## License
-
-This project is open source and available under the terms specified in the LICENSE file.
