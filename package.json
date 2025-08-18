@@ -3,13 +3,15 @@
   "version": "0.3.1",
   "description": "MCP server for retrieving and managing Cursor rules and AGENTS.md files",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "bin": {
-    "agent-rules-mcp": "index.ts"
+    "agent-rules-mcp": "dist/index.js"
   },
   "scripts": {
+    "build": "tsc && cp tsconfig.json dist/",
     "start": "node index.ts",
     "test": "vitest run",
+    "prepublishOnly": "pnpm build",
     "prettier:check": "prettier --check \"src/**/*\" \"src/*\"",
     "prettier:format": "prettier --write \"src/**/*\" \"src/*\""
   },
@@ -18,10 +20,7 @@
     "url": "git+https://github.com/fjlaubscher/agent-rules-mcp.git"
   },
   "files": [
-    "index.ts",
-    "src/**/*",
-    "ts-paths-loader.ts",
-    "tsconfig.json",
+    "dist/**/*",
     "README.md",
     "LICENSE"
   ],
