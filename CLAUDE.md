@@ -27,8 +27,7 @@ The server provides these tools:
 
 ## Commands
 
-- **Build**: `pnpm build` - Compiles TypeScript to JavaScript in `dist/` folder
-- **Start**: `pnpm start` - Runs the compiled server from `dist/index.js`
+- **Start**: `pnpm start` - Runs the TypeScript server directly using Node.js v22+ native TypeScript support
 - **Test**: `pnpm test` - Runs tests using Vitest
 - **Format**: `pnpm format` - Formats code using Prettier
 
@@ -36,9 +35,10 @@ The server provides these tools:
 
 The project uses:
 
-- Path aliases with `@/*` mapping to `src/*`
+- Path aliases with `@/*` mapping to `src/*`  
 - ES2022 target and modules
-- Custom path resolution via `ts-paths-loader.mjs` for runtime execution
+- Direct TypeScript execution with Node.js v22+ native support
+- Custom path resolution via `ts-paths-loader.mjs` for alias mapping
 
 ## Development Notes
 
