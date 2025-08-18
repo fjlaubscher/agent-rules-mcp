@@ -39,6 +39,9 @@
     "email": "francoisjlaubscher@gmail.com"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },
