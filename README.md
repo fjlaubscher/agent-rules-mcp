@@ -21,17 +21,7 @@ This MCP server provides the following tools:
 
 ### Install as Package
 
-**Option 1: One-time install with registry flag**
 ```bash
-npm install -D @fjlaubscher/agent-rules-mcp --registry=https://npm.pkg.github.com
-```
-
-**Option 2: Configure scope permanently (recommended)**
-```bash
-# Set up scope once
-npm config set @fjlaubscher:registry https://npm.pkg.github.com
-
-# Then install normally
 npm install -D @fjlaubscher/agent-rules-mcp
 ```
 
