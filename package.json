@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node index.ts",
     "test": "vitest run",
-    "format": "prettier --write src"
+    "prettier:check": "prettier --check \"src/**/*\" \"src/*\"",
+    "prettier:format": "prettier --write \"src/**/*\" \"src/*\""
   },
   "repository": {
     "type": "git",
@@ -45,7 +46,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "@types/node": "^24.2.0",
+    "@types/node": "^24.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",
@@ -53,7 +54,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.1",
-    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@modelcontextprotocol/sdk": "^1.17.3",
     "minimatch": "^10.0.3"
   },
   "packageManager": "pnpm@10.12.4+sha1.88a0ccfe72d6345dede50dc9d6158400be2420eb"
