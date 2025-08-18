@@ -1,0 +1,18 @@
+# Development files
+node_modules/
+dist/
+.git/
+.gitignore
+
+# Test files
+**/*.test.ts
+vitest.config.ts
+vitest.setup.ts
+
+# Development configuration
+.vscode/
+*.log
+*.tmp
+
+# CI/CD
+.github/workflows/

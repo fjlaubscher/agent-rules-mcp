@@ -1,15 +1,41 @@
 {
-  "name": "node",
-  "version": "1.0.0",
-  "description": "NodeJS + Typescript boilerplate",
+  "name": "@fjlaubscher/agent-rules-mcp",
+  "version": "0.0.0",
+  "description": "MCP server for retrieving and managing Cursor rules and AGENTS.md files",
   "type": "module",
   "main": "index.ts",
+  "bin": {
+    "agent-rules-mcp": "index.ts"
+  },
   "scripts": {
     "start": "node index.ts",
     "test": "vitest run",
     "format": "prettier --write src"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fjlaubscher/agent-rules-mcp.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "index.ts",
+    "src/**/*",
+    "ts-paths-loader.ts",
+    "tsconfig.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cursor",
+    "rules",
+    "agents",
+    "ai",
+    "development"
+  ],
   "author": {
     "name": "Francois Laubscher",
     "email": "francoisjlaubscher@gmail.com"

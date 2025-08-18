@@ -12,43 +12,68 @@ This MCP server provides the following tools:
 - **`load_agents`** - Load and cache AGENTS.md file from project root
 - **`get_agents`** - Get AGENTS.md content for the current project
 
-## Setup with Claude Code
+## Installation
 
 ### Prerequisites
 
 - Node.js 22 or later
-- pnpm package manager
 - Claude Code CLI
 
-### Installation
+### Install as Package
 
-1. **Clone and build the server:**
+**Option 1: One-time install with registry flag**
+```bash
+npm install -D @fjlaubscher/agent-rules-mcp --registry=https://npm.pkg.github.com
+```
+
+**Option 2: Configure scope permanently (recommended)**
+```bash
+# Set up scope once
+npm config set @fjlaubscher:registry https://npm.pkg.github.com
+
+# Then install normally
+npm install -D @fjlaubscher/agent-rules-mcp
+```
+
+### Configure Claude Code
+
+Add the server to your Claude Code configuration file (`~/.config/claude-code/mcp-settings.json` on Linux/macOS or `%APPDATA%\claude-code\mcp-settings.json` on Windows):
+
+```json
+{
+  "mcpServers": {
+    "agent-rules": {
+      "command": "npx",
+      "args": ["agent-rules-mcp"]
+    }
+  }
+}
+```
+
+Restart Claude Code to load the MCP server.
+
+### Alternative: Development Setup
+
+1. **Clone and install:**
 
    ```bash
    git clone <repository-url>
    cd agent-rules-mcp
    pnpm install
-   pnpm build
    ```
 
-2. **Configure Claude Code MCP settings:**
-
-   Add the server to your Claude Code configuration file (`~/.config/claude-code/mcp-settings.json` on Linux/macOS or `%APPDATA%\claude-code\mcp-settings.json` on Windows):
+2. **Configure Claude Code with local path:**
 
    ```json
    {
      "mcpServers": {
        "agent-rules": {
          "command": "node",
-         "args": ["/path/to/agent-rules-mcp/dist/index.js"]
+         "args": ["/path/to/agent-rules-mcp/index.ts"]
        }
      }
    }
    ```
-
-   Replace `/path/to/agent-rules-mcp` with the actual path to this repository.
-
-3. **Restart Claude Code** to load the MCP server.
 
 ### Usage
 
