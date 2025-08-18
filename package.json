@@ -17,9 +17,6 @@
     "type": "git",
     "url": "git+https://github.com/fjlaubscher/agent-rules-mcp.git"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "files": [
     "index.ts",
     "src/**/*",
