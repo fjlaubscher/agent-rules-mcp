@@ -21,9 +21,9 @@ export async function resolve(specifier: string, context: any, nextResolve: any)
       const subPath = specifier.slice(aliasPrefix.length).replace(/^\/+/, '');
       let resolvedFile = path.resolve(__dirname, targetPrefix, subPath);
       if (existsSync(resolvedFile) && statSync(resolvedFile).isDirectory()) {
-        resolvedFile = path.join(resolvedFile, 'index.ts');
+        resolvedFile = path.join(resolvedFile, 'index.js');
       } else if (!path.extname(resolvedFile)) {
-        resolvedFile += '.ts';
+        resolvedFile += '.js';
       }
       return nextResolve(pathToFileURL(resolvedFile).href, context);
     }
